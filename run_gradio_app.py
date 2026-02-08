@@ -3,32 +3,30 @@ import pandas as pd
 import os
 from src.incident_agents.graph import app
 
-# 🎨 Customizing the look and feel
-custom_theme = gr.themes.Soft(
-    primary_hue="emerald",
+# Using Slate for neutrals and Sky for the primary focus to create a calm atmosphere
+kind_theme = gr.themes.Soft(
+    primary_hue="sky",
     secondary_hue="slate",
     neutral_hue="slate",
+    font=[gr.themes.GoogleFont("Inter"), "sans-serif"]
+).set(
+    # Custom CSS-like overrides for a "softer" feel
+    body_background_fill="#F9FBFC",  # Soft off-white to reduce glare
+    block_title_text_weight="600",
+    block_label_text_size="*text_sm",
+    button_primary_background_fill="#0284C7", # Soft Sky Blue
+    button_primary_background_fill_hover="#0369A1",
 )
 
 def get_report_history():
-    """Scans the reports folder and returns a list of filenames."""
-    if not os.path.exists("reports"):
-        return []
-    # List .md files, sorted by newest first
+    if not os.path.exists("reports"): return []
     files = [f for f in os.listdir("reports") if f.endswith(".md")]
     return sorted(files, reverse=True)
 
 def load_report_content(filename):
-    """Reads and returns the content of a selected report file."""
-    if not filename:
-        return "Select a report from the list to view it."
-    path = os.path.join("reports", filename)
-    with open(path, "r") as f:
+    if not filename: return "Select a report to view."
+    with open(os.path.join("reports", filename), "r") as f:
         return f.read()
-
-def preview_csv(file):
-    if file is None: return None
-    return pd.read_csv(file.name).head(10)
 
 def process_incident(file_obj, text_input):
     raw_data = ""
@@ -37,8 +35,9 @@ def process_incident(file_obj, text_input):
     elif text_input:
         raw_data = text_input
     else:
-        return 0, "⚠️ No data provided.", "Error", gr.update(choices=get_report_history())
+        return 0, "⚠️ Please provide log data.", "Idle", gr.update()
 
+    # Shared state logic
     initial_state = {
         "raw_data": raw_data, "logs": [], "detected_threats": [],
         "risk_score": 0, "incident_report": "", "next_step": ""
@@ -46,55 +45,52 @@ def process_incident(file_obj, text_input):
     
     result = app.invoke(initial_state)
     
-    # Update the history list after a new report is generated
     return (
         result.get("risk_score", 0),
-        result.get("incident_report", "No report generated."),
-        "✅ Analysis Complete",
+        result.get("incident_report", "Analysis complete."),
+        "✅ System Ready",
         gr.update(choices=get_report_history())
     )
 
-# --- Gradio UI Layout ---
-with gr.Blocks(theme=custom_theme, title="Cyber Detect AI") as demo:
-    gr.Markdown("# 🛡️ Cyber Detect AI - Security Command Center")
-    
-    with gr.Row():
-        with gr.Column(scale=2):
-            with gr.Tabs() as tabs:
-                with gr.TabItem("📁 File Analysis", id=0):
-                    file_input = gr.File(label="Upload logs.csv", file_types=[".csv"])
-                    preview_table = gr.Dataframe(label="Log Preview", interactive=False)
-                    file_input.change(fn=preview_csv, inputs=file_input, outputs=preview_table)
+# --- Friendly UI Layout ---
+with gr.Blocks(theme=kind_theme, title="Cyber Detect AI") as demo:
+    with gr.Column(elem_id="container"):
+        gr.Markdown("# 🛡️ Cyber Detect AI")
+        gr.Markdown("A systematic, multi-agent approach to security incident detection.")
+        
+        with gr.Row():
+            with gr.Column(scale=3):
+                with gr.Tabs():
+                    with gr.TabItem("📁 Log Upload"):
+                        file_input = gr.File(label="Upload CSV Logs", file_types=[".csv"])
+                        preview = gr.Dataframe(label="Data Preview", max_rows=5, interactive=False)
+                        file_input.change(fn=lambda x: pd.read_csv(x.name).head(5) if x else None, inputs=file_input, outputs=preview)
+                    
+                    with gr.TabItem("✍️ Snippet Entry"):
+                        text_input = gr.Textbox(label="Manual Log Input", lines=6, placeholder="Paste log lines here...")
+
+                    with gr.TabItem("📜 History"):
+                        report_list = gr.Dropdown(label="Previous Reports", choices=get_report_history())
+                        history_md = gr.Markdown("*Select a report above to view details.*")
+                        report_list.change(fn=load_report_content, inputs=report_list, outputs=history_md)
+
+                analyze_btn = gr.Button("RUN DETECTION ENGINE", variant="primary")
                 
-                with gr.TabItem("✍️ Manual Entry", id=1):
-                    text_input = gr.Textbox(label="Raw Log Snippets", lines=8)
-
-                with gr.TabItem("📜 History", id=2):
-                    gr.Markdown("### Past Incident Reports")
-                    report_list = gr.Dropdown(label="Select a Report", choices=get_report_history())
-                    history_display = gr.Markdown("Select a file above to preview.")
-                    refresh_btn = gr.Button("🔄 Refresh List")
-
-            analyze_btn = gr.Button("🔍 START DETECTION ENGINE", variant="primary")
-            
-        with gr.Column(scale=1):
-            risk_gauge = gr.Number(label="Threat Risk Score (0-100)")
-            status_label = gr.Label(label="Engine Status", value="Ready")
-            
-    with gr.Row():
-        with gr.Column():
-            gr.Markdown("### 📜 AI Generated Incident Report")
-            report_markdown = gr.Markdown("The report will appear here after analysis.")
+            with gr.Column(scale=1):
+                # Using a 'Label' and 'Number' for clarity
+                risk_display = gr.Number(label="Threat Probability (%)", precision=0)
+                status_box = gr.Label(label="Engine Status", value="System Idle")
+                
+        with gr.Row():
+            gr.Markdown("### 📊 Live Analysis Output")
+            report_out = gr.Markdown("Analysis report will appear here...")
 
     # Event Wiring
     analyze_btn.click(
         fn=process_incident,
         inputs=[file_input, text_input],
-        outputs=[risk_gauge, report_markdown, status_label, report_list]
+        outputs=[risk_display, report_out, status_box, report_list]
     )
-    
-    report_list.change(fn=load_report_content, inputs=report_list, outputs=history_display)
-    refresh_btn.click(fn=lambda: gr.update(choices=get_report_history()), outputs=report_list)
 
 if __name__ == "__main__":
     demo.launch()
