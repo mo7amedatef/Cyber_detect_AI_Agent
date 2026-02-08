@@ -1,0 +1,8 @@
+timestamp,source_ip,event_type,user,status,description
+2026-02-08T01:00:00,192.168.1.10,login,mohamed,success,Normal user login
+2026-02-08T01:05:00,45.33.22.11,login,admin,failed,Invalid password attempt
+2026-02-08T01:05:05,45.33.22.11,login,admin,failed,Invalid password attempt
+2026-02-08T01:05:10,45.33.22.11,login,admin,failed,Invalid password attempt
+2026-02-08T01:05:15,45.33.22.11,login,admin,success,Successful login after multiple failures
+2026-02-08T02:00:00,10.0.0.5,email_access,it_support,success,Access to internal mail server
+2026-02-08T02:10:00,192.168.1.50,file_download,finance_dept,success,Downloaded salary_info.zip

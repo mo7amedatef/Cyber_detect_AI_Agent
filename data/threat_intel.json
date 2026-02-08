@@ -1,0 +1,19 @@
+{
+  "malicious_ips": {
+    "45.33.22.11": {
+      "reputation": "high_risk",
+      "type": "botnet",
+      "location": "Unknown"
+    },
+    "192.168.1.50": {
+      "reputation": "suspicious",
+      "type": "potential_insider_threat",
+      "location": "Internal Network"
+    }
+  },
+  "known_ttps": [
+    "T1110 - Brute Force",
+    "T1566 - Phishing",
+    "T1078 - Valid Accounts"
+  ]
+}
