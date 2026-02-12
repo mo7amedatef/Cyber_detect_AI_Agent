@@ -1,7 +1,7 @@
 [project]
 name = "cyber-detect-ai-agent"
 version = "0.1.0"
-description = "Add your description here"
+description = "LangGraph-powered multi-agent cybersecurity incident detection and reporting system."
 readme = "README.md"
 requires-python = ">=3.13"
 dependencies = [
@@ -9,6 +9,7 @@ dependencies = [
     "langchain-groq>=1.1.2",
     "langgraph>=1.0.8",
     "pandas>=3.0.0",
+    "pytest>=8.0.0",
     "pydantic>=2.12.5",
     "python-dotenv>=1.2.1",
 ]

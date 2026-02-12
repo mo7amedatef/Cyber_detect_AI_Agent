@@ -28,10 +28,20 @@ def load_report_content(filename):
     with open(os.path.join("reports", filename), "r") as f:
         return f.read()
 
+def preview_csv(file_obj):
+    if file_obj is None:
+        return pd.DataFrame()
+    try:
+        return pd.read_csv(file_obj.name).head(5)
+    except Exception:
+        return pd.DataFrame()
+
 def process_incident(file_obj, text_input):
     raw_data = ""
     if file_obj:
-        raw_data = pd.read_csv(file_obj.name).to_string()
+        # Preserve raw CSV content so ingest can route this run to the uploaded dataset.
+        with open(file_obj.name, "r", encoding="utf-8") as f:
+            raw_data = f.read()
     elif text_input:
         raw_data = text_input
     else:
@@ -63,16 +73,8 @@ with gr.Blocks(theme=kind_theme, title="Cyber Detect AI") as demo:
                 with gr.Tabs():
                     with gr.TabItem("📁 Log Upload"):
                         file_input = gr.File(label="Upload CSV Logs", file_types=[".csv"])
-                        preview = gr.Dataframe(label="Data Preview", max_rows=5, interactive=False)
-                        def preview_csv(file_obj):
-    if file_obj is None:
-        return pd.DataFrame()
-    try:
-        return pd.read_csv(file_obj.name).head(5)
-    except Exception:
-        return pd.DataFrame()
-
-file_input.change(fn=preview_csv, inputs=file_input, outputs=preview)
+                        preview = gr.Dataframe(label="Data Preview", interactive=False)
+                        file_input.change(fn=preview_csv, inputs=file_input, outputs=preview)
                     
                     with gr.TabItem("✍️ Snippet Entry"):
                         text_input = gr.Textbox(label="Manual Log Input", lines=6, placeholder="Paste log lines here...")
