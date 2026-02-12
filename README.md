@@ -1,7 +1,19 @@
 # 🛡️ Cyber Detect AI: Multi-Agent Incident Response System
 ## From Raw Logs to Intelligent Action Plans
 
-Cyber Detect AI is a stateful multi-agent system designed to automate the lifecycle of cybersecurity incident detection. The system transforms high-volume security telemetry into actionable intelligence, mimicking the reasoning process of a senior SOC analyst.
+Cyber Detect AI is a stateful multi-agent system designed to automate the lifecycle of cybersecurity incident detection.
+
+---
+
+## ⚡ Quick Setup
+
+1. **Clone and install** (e.g. `uv sync` or `pip install -e .`).
+2. **Configure Groq API key:** Copy `.env.example` to `.env` and set your key:
+   ```bash
+   cp .env.example .env
+   # Edit .env and set GROQ_API_KEY=your_key (get one at https://console.groq.com)
+   ```
+3. **Run the app:** `python run_gradio_app.py` or `python main.py` for a CLI simulation. The system transforms high-volume security telemetry into actionable intelligence, mimicking the reasoning process of a senior SOC analyst.
 
 ---
 

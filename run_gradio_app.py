@@ -64,7 +64,15 @@ with gr.Blocks(theme=kind_theme, title="Cyber Detect AI") as demo:
                     with gr.TabItem("📁 Log Upload"):
                         file_input = gr.File(label="Upload CSV Logs", file_types=[".csv"])
                         preview = gr.Dataframe(label="Data Preview", max_rows=5, interactive=False)
-                        file_input.change(fn=lambda x: pd.read_csv(x.name).head(5) if x else None, inputs=file_input, outputs=preview)
+                        def preview_csv(file_obj):
+    if file_obj is None:
+        return pd.DataFrame()
+    try:
+        return pd.read_csv(file_obj.name).head(5)
+    except Exception:
+        return pd.DataFrame()
+
+file_input.change(fn=preview_csv, inputs=file_input, outputs=preview)
                     
                     with gr.TabItem("✍️ Snippet Entry"):
                         text_input = gr.Textbox(label="Manual Log Input", lines=6, placeholder="Paste log lines here...")

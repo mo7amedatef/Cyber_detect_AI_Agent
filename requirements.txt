@@ -1,6 +1,6 @@
-langchain-groq
-langgraph
-pydantic
-python-dotenv
-pandas
-gradio
+gradio>=6.5.1
+langchain-groq>=1.1.2
+langgraph>=1.0.8
+pandas>=3.0.0
+pydantic>=2.12.5
+python-dotenv>=1.2.1
